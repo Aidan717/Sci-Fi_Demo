@@ -1,4 +1,0 @@
-repository "Sci-Fi Demo@PillarStudios@cloud"
-  path "/"
-    smartbranch "/main" changeset "8"             
-     
