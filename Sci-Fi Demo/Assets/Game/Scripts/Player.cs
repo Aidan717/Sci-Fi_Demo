@@ -1,5 +1,5 @@
+using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Player : MonoBehaviour
@@ -10,12 +10,28 @@ public class Player : MonoBehaviour
     private CharacterController _controller;
     [SerializeField]
     private  GameObject _muzzleFlash;
+    [SerializeField]
+    private GameObject _hitMarker;
+    [SerializeField]
+    private AudioSource _weaponAudio;
+
+    [SerializeField]
+    private int currentAmmo;
+    private int maxAmmo = 50;
+
+    private bool _isReloading = false;
+
+    private UIManager _uiManager;
+
     // Start is called before the first frame update
     void Start()
     {
         _controller = GetComponent<CharacterController>();
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;  
+
+        currentAmmo = maxAmmo;
+        _uiManager = GameObject.Find("Canvas").GetComponent<UIManager>();
     }
 
     // Update is called once per frame
@@ -23,6 +39,7 @@ public class Player : MonoBehaviour
     {
         CalculateRaycast();
         CalcuateMovement();
+        Reload();
 
         if (Input.GetKey(KeyCode.Escape))
         {
@@ -31,18 +48,44 @@ public class Player : MonoBehaviour
         }
     }
 
+    private void Reload() {
+        if (Input.GetKey(KeyCode.R) && _isReloading == false ) {
+            _isReloading = true;
+            StartCoroutine("WeaponReload");
+            
+        }
+    }
+
+    IEnumerator WeaponReload() {
+        yield return new WaitForSeconds(2f);
+        currentAmmo = maxAmmo;
+        _uiManager.UpdateAmmo(currentAmmo);
+        _isReloading = false;
+    }
+        
+
     private void CalculateRaycast()
     {
-        if (Input.GetMouseButton(0)) {
+        if (Input.GetMouseButton(0) && currentAmmo > 0) {
             _muzzleFlash.SetActive(true);
+            if (!_weaponAudio.isPlaying) {
+                _weaponAudio.Play();    
+            }
+            currentAmmo--;
+            _uiManager.UpdateAmmo(currentAmmo);
+            
             Ray origin = Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
             RaycastHit hitInfo;
             if (Physics.Raycast(origin, out hitInfo))
             {
                 Debug.Log("Hit: " + hitInfo.transform.name);
+                GameObject hitMarker = Instantiate(_hitMarker, hitInfo.point, Quaternion.LookRotation(hitInfo.normal)) as GameObject;
+                //GameObject hitMarker = (GameObject)Instantiate(_hitMarker, hitInfo.point, Quaternion.LookRotation(hitInfo.normal));
+                Destroy(hitMarker, 0.2f);
             }
         } else {
             _muzzleFlash.SetActive(false);
+            _weaponAudio.Stop();
         }
     }
 
