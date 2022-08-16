@@ -25,6 +25,9 @@ public class Player : MonoBehaviour
 
     public bool hasCoin = false;
 
+    [SerializeField]
+    private GameObject _weapon;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -84,6 +87,11 @@ public class Player : MonoBehaviour
                 GameObject hitMarker = Instantiate(_hitMarker, hitInfo.point, Quaternion.LookRotation(hitInfo.normal)) as GameObject;
                 //GameObject hitMarker = (GameObject)Instantiate(_hitMarker, hitInfo.point, Quaternion.LookRotation(hitInfo.normal));
                 Destroy(hitMarker, 0.2f);
+
+                Destructables crate = hitInfo.transform.GetComponent<Destructables>();
+                if (crate != null) {
+                    crate.DestroyCrate();
+                }
             }
         } else {
             _muzzleFlash.SetActive(false);
@@ -100,5 +108,9 @@ public class Player : MonoBehaviour
 
         velocity = transform.transform.TransformDirection(velocity);
         _controller.Move( Time.deltaTime * velocity );
+    }
+
+    public void EnableWeapons() {
+        _weapon.SetActive(true);
     }
 }
