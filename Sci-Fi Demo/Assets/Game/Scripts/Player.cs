@@ -71,7 +71,7 @@ public class Player : MonoBehaviour
 
     private void CalculateRaycast()
     {
-        if (Input.GetMouseButton(0) && currentAmmo > 0) {
+        if (Input.GetMouseButton(0) && currentAmmo > 0 && _weapon.activeInHierarchy == true) {
             _muzzleFlash.SetActive(true);
             if (!_weaponAudio.isPlaying) {
                 _weaponAudio.Play();    
